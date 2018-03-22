@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!-- Component scanning -->
+    <context:component-scan base-package="stelmach"/>
+
+    <!-- Annotations support -->
+    <mvc:annotation-driven/>
+
+    <!-- View resolver -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/view/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!-- Resources location -->
+    <mvc:resources mapping="/resources/**" location="/resources/"/>
+
+    <!-- Database DataSource -->
+    <bean id="myDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+          destroy-method="close">
+
+        <property name="driverClass" value="com.mysql.jdbc.Driver"/>
+        <property name="jdbcUrl" value="jdbc:mysql://localhost:3306/crm?useSSL=false"/>
+
+        <property name="user" value="crmadmin"/>
+        <property name="password" value="crmadmin"/>
+
+        <!-- Minimum number of JDBC connections in the pool -->
+        <property name="minPoolSize" value="5"/>
+        <!-- Maximum number of JDBC connections in the pool -->
+        <property name="maxPoolSize" value="20"/>
+        <!-- Amount of seconds before idle connection is removed from the pool -->
+        <property name="maxIdleTime" value="30000"/>
+    </bean>
+
+    <!-- Hibernate SessionFactory -->
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+
+        <property name="dataSource" ref="myDataSource"/>
+        <property name="packagesToScan" value="stelmach.entity"/>
+
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+                <prop key="hibernate.show_sql">true</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- HibernateTransactionManager -->
+    <bean id="myTransactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+    <!-- Enable transactional behavior through annotations -->
+    <tx:annotation-driven transaction-manager="myTransactionManager"/>
+
+    <!-- Strings externalization -->
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource" >
+        <property name="basenames">
+            <list>
+                <value>strings.headers</value>
+                <value>strings.buttons</value>
+                <value>strings.customer</value>
+                <value>strings.company</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- Caching the language -->
+    <bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver">
+        <property name="defaultLocale" value="en"/>
+    </bean>
+
+    <!-- Interceptor for changing the language -->
+    <mvc:interceptors>
+        <bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+            <property name="paramName" value="language"/>
+        </bean>
+    </mvc:interceptors>
+
+</beans>
