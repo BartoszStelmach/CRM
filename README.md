@@ -1,3 +1,5 @@
+# ConsoleRegistrationLogin
+
 Simple web application for managing customers using:
   - Maven
   - Spring MVC
