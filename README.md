@@ -1,4 +1,4 @@
-# ConsoleRegistrationLogin
+# CRM
 
 Simple web application for managing customers using:
   - Maven
